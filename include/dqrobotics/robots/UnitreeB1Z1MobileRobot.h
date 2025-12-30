@@ -37,6 +37,11 @@ protected:
     const int dim_configuration_space_ = 9;
     DQ X_J1_OFFSET_;
     DQ X_HEIGHT_OFFSET_;
+    MatrixXd Is_;
+    MatrixXd zero_3x6_;
+
+    MatrixXd zero_6x3_;
+    MatrixXd I6x6_;
 
 public:
     UnitreeB1Z1MobileRobot();
@@ -58,6 +63,10 @@ public:
 
     void update_base_offset(const DQ& X_J1_OFFSET);
     void update_base_height_from_IMU(const DQ& X_IMU);
+
+    std::tuple<MatrixXd, VectorXd> compute_saturation_constraints(const VectorXd& q,
+                                                                  const std::tuple<VectorXd, VectorXd>& q_dot_limits
+                                                                  );
 
 };
 

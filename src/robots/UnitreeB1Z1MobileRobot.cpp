@@ -34,6 +34,15 @@ UnitreeB1Z1MobileRobot::UnitreeB1Z1MobileRobot()
     kin_arm_ = std::make_shared<DQ_SerialManipulatorDH>(UnitreeZ1Robot::kinematics());
     kin_holonomic_base_ = std::make_shared<DQ_HolonomicBase>();
     kin_holonomic_base_->set_frame_displacement(DQ(1));
+
+    Is_ = (MatrixXd(3,8) << 0,0,0,1, 0,0,0,0,
+                            0,0,0,0, 0,1,0,0,
+                            0,0,0,0, 0,0,1,0).finished();
+
+    zero_3x6_ = MatrixXd::Zero(3,6);
+
+    zero_6x3_ = MatrixXd::Zero(6,3);
+    I6x6_ = MatrixXd::Identity(6,6);
 }
 
 DQ UnitreeB1Z1MobileRobot::fkm(const VectorXd &q, const int &ith) const
@@ -116,6 +125,50 @@ void UnitreeB1Z1MobileRobot::update_base_height_from_IMU(const DQ &X_IMU)
 {
     VectorXd p_IMU = X_IMU.translation().vec3();
     X_HEIGHT_OFFSET_ = 1+0.5*E_*p_IMU(2)*k_;
+}
+
+
+/**
+ * @brief UnitreeB1Z1MobileRobot::compute_saturation_constraints This method builds and returns the constraints
+ *                         used to impose saturation limits in the control inputs (velocities).
+ * @param q The robot configuration
+ * @param q_dot_limits The desired saturation limits
+ * @return A tuple {A,b} containing the saturation constraints
+ */
+std::tuple<MatrixXd, VectorXd>
+UnitreeB1Z1MobileRobot::compute_saturation_constraints(const VectorXd& q,
+                                                       const std::tuple<VectorXd, VectorXd>& q_dot_limits)
+{
+    MatrixXd Alim(18,9);
+    VectorXd blim(18);
+    MatrixXd Jhol =  pose_jacobian(q,2);
+    MatrixXd Jtwist_b =  Is_*2*hamiplus8(fkm(q,2).conj())*Jhol.block(0,0,8,3);
+
+    const auto [q_dot_min, q_dot_max] = q_dot_limits;
+
+    if (q_dot_min.size() != 9 || q_dot_max.size() != 9 || q.size() != 9)
+        throw std::runtime_error("UnitreeB1Z1MobileRobot::compute_saturation_constraints:: Wrong vector dimensions!");
+
+    MatrixXd part1(3,9);
+    part1 << Jtwist_b, zero_3x6_;
+
+    MatrixXd part2(3,9);
+    part2 << -Jtwist_b, zero_3x6_;
+
+    MatrixXd part3(6,9);
+    part3 << zero_6x3_, I6x6_;
+
+    MatrixXd part4(6,9);
+    part4 << zero_6x3_, -I6x6_;
+
+    Alim <<part1, part2, part3, part4;
+
+    blim << q_dot_max(2),  q_dot_max(0),  q_dot_max(1),
+           -q_dot_min(2), -q_dot_min(0), -q_dot_min(1),
+            q_dot_max.tail(6),
+           -q_dot_min.tail(6);
+
+    return {Alim, blim};
 }
 
 
