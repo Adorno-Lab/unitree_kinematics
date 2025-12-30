@@ -129,7 +129,8 @@ void UnitreeB1Z1MobileRobot::update_base_height_from_IMU(const DQ &X_IMU)
 
 
 /**
- * @brief UnitreeB1Z1MobileRobot::compute_saturation_constraints
+ * @brief UnitreeB1Z1MobileRobot::compute_saturation_constraints This method builds and returns the constraints
+ *                         used to impose saturation limits in the control inputs (velocities).
  * @param q The robot configuration
  * @param q_dot_limits The desired saturation limits
  * @return A tuple {A,b} containing the saturation constraints
@@ -144,6 +145,9 @@ UnitreeB1Z1MobileRobot::compute_saturation_constraints(const VectorXd& q,
     MatrixXd Jtwist_b =  Is_*2*hamiplus8(fkm(q,2).conj())*Jhol.block(0,0,8,3);
 
     const auto [q_dot_min, q_dot_max] = q_dot_limits;
+
+    if (q_dot_min.size() != 9 || q_dot_max.size() != 9 || q.size() != 9)
+        throw std::runtime_error("UnitreeB1Z1MobileRobot::compute_saturation_constraints:: Wrong vector dimensions!");
 
     MatrixXd part1(3,9);
     part1 << Jtwist_b, zero_3x6_;
