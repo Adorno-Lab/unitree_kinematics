@@ -22,7 +22,37 @@
 */
 
 #include "dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h"
-#include <dqrobotics_extensions/robot_constraint_manager/numpy.hpp>
+//#include <dqrobotics_extensions/robot_constraint_manager/numpy.hpp>
+
+/**
+ * @brief _vstack stacks matrices in sequence vertically
+ * @param A
+ * @param B
+ * @return The matrix [A;
+ *                     B]
+ */
+MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B);
+
+
+MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B)
+{
+    int m_A = A.rows();
+    int m_B = B.rows();
+    int n_A = A.cols();
+    int n_B = B.cols();
+
+    if (n_A != n_B)
+        throw std::runtime_error(std::string("Wrong call of _vstack(A, B). ")
+                                     + std::string("Incompatible sizes. The cols of Matrix A and B must have the same dimensions. ")
+                                     + std::string("But A is ")+ std::to_string(A.rows())+ std::string("x")+ std::to_string(n_A)
+                                     + std::string(" and B is ")+ std::to_string(B.rows()) + std::string("x")+ std::to_string(n_B));
+
+    MatrixXd C = MatrixXd::Zero(m_A + m_B, n_A);
+    C.block(0,0, m_A, n_A) = A;
+    C.block(m_A, 0, m_B, n_B) = B;
+    return C;
+}
+
 
 UnitreeB1Z1CoppeliaSimZMQRobot::UnitreeB1Z1CoppeliaSimZMQRobot(const std::string &robot_name,
                                                                const std::shared_ptr<DQ_CoppeliaSimInterfaceZMQ> &coppeliasim_interface_sptr)
@@ -77,7 +107,7 @@ void UnitreeB1Z1CoppeliaSimZMQRobot::set_configuration([[maybe_unused]] const Ve
 VectorXd UnitreeB1Z1CoppeliaSimZMQRobot::get_configuration()
 {
     VectorXd qbase = _get_mobile_robot_configuration_from_pose(_get_base_pose());
-    VectorXd q = DQ_robotics_extensions::Numpy::vstack(qbase, _get_joint_arm_positions());
+    VectorXd q = _vstack(qbase, _get_joint_arm_positions());
     return q;
 }
 
