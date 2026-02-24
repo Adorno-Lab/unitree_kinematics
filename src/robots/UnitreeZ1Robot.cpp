@@ -31,6 +31,16 @@ namespace DQ_robotics
  * @brief _get_dh_matrix gets the DH matrix of the Unitree Z1 manipulator
  * @return the DH matrix (including a row describing the joint types).
  */
+DQ _get_effector();
+
+
+/**
+ * @brief _get_effector gets the end-effector offset.
+ * @return A unit dual quaternion that represents the end-effector offset.
+ */
+MatrixXd _get_dh_matrix();
+
+
 MatrixXd _get_dh_matrix()
 {
     const double pi = M_PI;
@@ -44,10 +54,6 @@ MatrixXd _get_dh_matrix()
     return raw_dh_matrix;
 }
 
-/**
- * @brief _get_effector gets the end-effector offset.
- * @return A unit dual quaternion that represents the end-effector offset.
- */
 DQ _get_effector()
 {
     DQ effector_ = 1 + 0.5*E_*0.2*k_;
