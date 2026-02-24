@@ -21,13 +21,79 @@
 # ################################################################
 */
 
-#include <dqrobotics_extensions/robot_constraint_manager/numpy.hpp>
+//#include <dqrobotics_extensions/robot_constraint_manager/numpy.hpp>
 
 #include "dqrobotics/robots/UnitreeB1Z1MobileRobot.h"
 #include "dqrobotics/robots/UnitreeZ1Robot.h"
 
 namespace DQ_robotics
 {
+
+/**
+ * @brief _hstack stacks matrices in sequence horizontally
+ * @param A
+ * @param B
+ * @return The matrix [A B]
+ */
+MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
+
+/**
+ * @brief _resize resizes a matrix A to a larger matrix of size (rowsxcols) that containts
+ *               the matrix A. The additional elements are zeros.
+ * @param A
+ * @param rows
+ * @param cols
+ * @return The matrix [A 0
+ *                     0 0]
+ */
+MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols);
+
+
+
+
+MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B)
+{
+
+    int m_A = A.rows();
+    int m_B = B.rows();
+
+    if (m_A != m_B)
+        throw std::runtime_error(std::string("Wrong usage of _hstack(A, B). ")
+                                 + std::string("Incompatible sizes. The rows of Matrix A and B must have the same dimensions. ")
+                                 + std::string("But A is ")+ std::to_string(m_A)+ std::string("x")+ std::to_string(A.cols())
+                                 + std::string(" and B is ")+ std::to_string(m_B) + std::string("x")+ std::to_string(B.cols()));
+    int n_A = A.cols();
+    int n_B = B.cols();
+    MatrixXd C = MatrixXd::Zero(m_A, n_A + n_B);
+    C.block(0,0, m_A, n_A) = A;
+    C.block(0, n_A, m_B, n_B) = B;
+    return C;
+}
+
+MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
+{
+    MatrixXd aux = MatrixXd::Zero(rows, cols);
+    int m = A.rows();
+    int n = A.cols();
+
+    if (m > rows)
+    {
+        throw std::runtime_error(std::string("The rows you used is smaller than the rows of the Matrix. ")
+                                 +std::string("Incompatible rows for resize. Matrix A has ")
+                                 +std::to_string(m)+ std::string(" rows. But you used ")
+                                 +std::to_string(rows));
+    }
+    if (n > cols)
+    {
+        throw std::runtime_error(std::string("The cols you used is smaller than the cols of the Matrix. ")
+                                 +std::string("Incompatible cols for resize. Matrix A has ")
+                                 +std::to_string(n)+ std::string(" cols. But you used ")
+                                 +std::to_string(cols));
+    }
+
+    aux.block(0,0, m, n) = A;
+    return aux;
+}
 
 UnitreeB1Z1MobileRobot::UnitreeB1Z1MobileRobot()
 {
@@ -81,14 +147,14 @@ MatrixXd UnitreeB1Z1MobileRobot::pose_jacobian(const VectorXd &q, const int &ith
     else if (ith == 2)
     {
         MatrixXd Jaux = haminus8(X_HEIGHT_OFFSET_)*kin_holonomic_base_->pose_jacobian(qbase);
-        J = DQ_robotics_extensions::Numpy::resize(Jaux, 8, get_dim_configuration_space());
+        J = _resize(Jaux, 8, get_dim_configuration_space());
     }else
     {
         MatrixXd J1 = haminus8(X_HEIGHT_OFFSET_*X_J1_OFFSET_*kin_arm_->fkm(qarm))*kin_holonomic_base_->pose_jacobian(qbase);
         MatrixXd J2 = hamiplus8(kin_holonomic_base_->fkm(qbase)*X_HEIGHT_OFFSET_*X_J1_OFFSET_)*kin_arm_->pose_jacobian(qarm, ith-3);
-        J = DQ_robotics_extensions::Numpy::hstack(J1, J2);
+        J = _hstack(J1, J2);
         if (J.cols() != 9)
-            J = DQ_robotics_extensions::Numpy::resize(J, 8, get_dim_configuration_space());
+            J = _resize(J, 8, get_dim_configuration_space());
     }
 
     return J;
