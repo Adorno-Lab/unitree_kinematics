@@ -39,6 +39,7 @@ add_library(${PROJECT_NAME} SHARED
     src/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.cpp
     src/robots/UnitreeB1Z1MobileRobot.cpp
     src/robots/UnitreeZ1Robot.cpp
+    src/robots/CFFSerialRobot.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -65,6 +66,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
 install(FILES
     include/dqrobotics/robots/UnitreeB1Z1MobileRobot.h
     include/dqrobotics/robots/UnitreeZ1Robot.h
+    include/dqrobotics/robots/CFFSerialRobot.h
     include/dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h
     DESTINATION "include/dqrobotics/"
 )
