@@ -213,6 +213,11 @@ MatrixXd CFFSerialRobot::pose_jacobian(const VectorXd &q) const
     return pose_jacobian(q, get_dim_configuration_space()-1);
 }
 
+int CFFSerialRobot::get_dim_configuration_space() const
+{
+    return dim_configuration_space_;
+}
+
 MatrixXd CFFSerialRobot::pose_jacobian_derivative([[maybe_unused]] const VectorXd &q,
                                                   [[maybe_unused]] const VectorXd &q_dot,
                                                   [[maybe_unused]] const int &to_ith_link) const
