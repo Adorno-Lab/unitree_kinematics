@@ -62,6 +62,11 @@ UnitreeB1Z1CoppeliaSimZMQRobot::UnitreeB1Z1CoppeliaSimZMQRobot(const std::string
     _initialize_robot_objectnames_from_coppeliasim();
 }
 
+std::vector<std::string> UnitreeB1Z1CoppeliaSimZMQRobot::get_jointnames() const
+{
+    return jointnames_;
+}
+
 
 /**
  * @brief UnitreeB1Z1CoppeliaSimZMQRobot::_initialize_robot_objectnames_from_coppeliasim

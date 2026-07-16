@@ -51,7 +51,7 @@ public:
                                    const MODEL& model = MODEL::HOLONOMIC_MOBILE_MANIPULATOR);
 
 
-
+    std::vector<std::string> get_jointnames() const;
 
 
     void set_configuration(const VectorXd& q) override;
