@@ -30,8 +30,11 @@
 
 class UnitreeB1Z1CoppeliaSimZMQRobot: public DQ_CoppeliaSimRobotZMQ
 {
-
+public:
+    // Consider the base as a holonomic mobile platform or as a constrained free-flying robot
+    enum class MODEL{HOLONOMIC_MOBILE_MANIPULATOR, CFF_MANIPULATOR};
 protected:
+    MODEL model_;
     std::vector<std::string> alljointnames_;
     std::vector<std::string> jointnames_;
     std::string gripper_jointname_;
@@ -44,7 +47,8 @@ protected:
     DQ _get_base_pose();
 public:
     UnitreeB1Z1CoppeliaSimZMQRobot(const std::string& robot_name,
-                                  const std::shared_ptr<DQ_CoppeliaSimInterfaceZMQ>& coppeliasim_interface_sptr);
+                                   const std::shared_ptr<DQ_CoppeliaSimInterfaceZMQ>& coppeliasim_interface_sptr,
+                                   const MODEL& model = MODEL::HOLONOMIC_MOBILE_MANIPULATOR);
 
 
 

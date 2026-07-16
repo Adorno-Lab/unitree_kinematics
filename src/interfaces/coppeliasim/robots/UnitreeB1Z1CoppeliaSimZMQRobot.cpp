@@ -55,8 +55,9 @@ MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B)
 
 
 UnitreeB1Z1CoppeliaSimZMQRobot::UnitreeB1Z1CoppeliaSimZMQRobot(const std::string &robot_name,
-                                                               const std::shared_ptr<DQ_CoppeliaSimInterfaceZMQ> &coppeliasim_interface_sptr)
-    :DQ_CoppeliaSimRobotZMQ(robot_name, coppeliasim_interface_sptr)
+                                                               const std::shared_ptr<DQ_CoppeliaSimInterfaceZMQ> &coppeliasim_interface_sptr,
+                                                               const MODEL &model)
+    :DQ_CoppeliaSimRobotZMQ(robot_name, coppeliasim_interface_sptr), model_{model}
 {
     _initialize_robot_objectnames_from_coppeliasim();
 }
@@ -72,9 +73,6 @@ void UnitreeB1Z1CoppeliaSimZMQRobot::_initialize_robot_objectnames_from_coppelia
     jointnames_.pop_back();
     gripper_jointname_ = alljointnames_.back();
     holonomic_base_name_ = robot_name_; //+"/trunk_respondable";
-    //height_joint_ = robot_name_+"/height_joint";
-    //base_offset_ = _get_interface_sptr()->get_object_pose(jointnames_.at(0));
-
 }
 
 VectorXd UnitreeB1Z1CoppeliaSimZMQRobot::_get_mobile_robot_configuration_from_pose(const DQ &base)
@@ -99,14 +97,40 @@ DQ UnitreeB1Z1CoppeliaSimZMQRobot::_get_base_pose()
  return _get_interface_sptr()->get_object_pose(holonomic_base_name_);
 }
 
-void UnitreeB1Z1CoppeliaSimZMQRobot::set_configuration([[maybe_unused]] const VectorXd &q)
+void UnitreeB1Z1CoppeliaSimZMQRobot::set_configuration(const VectorXd &q)
 {
-    throw std::runtime_error("UnitreeB1Z1CoppeliaSimZMQRobot::set_configuration: Unsupported");
+    switch (model_) {
+
+        case MODEL::HOLONOMIC_MOBILE_MANIPULATOR:
+            throw std::runtime_error("UnitreeB1Z1CoppeliaSimZMQRobot::set_configuration:: Unsupported in the current MODEL");
+        case MODEL::CFF_MANIPULATOR:
+        {
+            const VectorXd qbase = q.head(8);
+            const VectorXd qarm  = q.tail(6);
+            const DQ xbase = DQ(qbase);
+            _get_interface_sptr()->set_object_pose(holonomic_base_name_, xbase);
+            _get_interface_sptr()->set_joint_positions(jointnames_, qarm);
+            break;
+        }
+        default:
+            throw std::runtime_error("UnitreeB1Z1CoppeliaSimZMQRobot::set_configuration:: Undefined model!");
+    }
+
 }
 
 VectorXd UnitreeB1Z1CoppeliaSimZMQRobot::get_configuration()
 {
-    VectorXd qbase = _get_mobile_robot_configuration_from_pose(_get_base_pose());
+    VectorXd qbase;
+    switch (model_) {
+        case MODEL::HOLONOMIC_MOBILE_MANIPULATOR:
+            qbase = _get_mobile_robot_configuration_from_pose(_get_base_pose());
+            break;
+        case MODEL::CFF_MANIPULATOR:
+            qbase = _get_base_pose().vec8();
+            break;
+        default:
+            throw std::runtime_error("UnitreeB1Z1CoppeliaSimZMQRobot::get_configuration():: Undefined model!");
+    }
     VectorXd q = _vstack(qbase, _get_joint_arm_positions());
     return q;
 }
