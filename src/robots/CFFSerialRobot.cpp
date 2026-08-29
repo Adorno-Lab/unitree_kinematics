@@ -2,26 +2,25 @@
 
 /**
  * @brief _hstack stacks matrices in sequence horizontally
- * @param A
- * @param B
+ * @param A First matrix
+ * @param B Second matrix
  * @return The matrix [A B]
  */
 MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
 
+
 /**
- * @brief _resize resizes a matrix A to a larger matrix of size (rowsxcols) that containts
+ * @brief _resize resizes a matrix A to a larger matrix of size (rowsxcols) that contains
  *               the matrix A. The additional elements are zeros.
- * @param A
- * @param rows
- * @param cols
- * @return The matrix [A 0
- *                     0 0]
+ * @param A Input matrix to be resized
+ * @param rows Desired number of rows (must be >= A.rows())
+ * @param cols Desired number of columns (must be >= A.cols())
+ * @return The resized matrix [A 0; 0 0]
  */
 MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols);
 
 
 
-///////////////////////////////////////////////
 
 MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
 {
@@ -72,7 +71,12 @@ namespace DQ_robotics
 {
 
 
-
+/**
+ * @brief CFFSerialRobot::CFFSerialRobot Constructor that initializes a serial robot
+ *        with a floating base (8 coefficients representing a unit dual quaternion
+ *        base pose + arm joints).
+ * @param robot_arm Shared pointer to the arm manipulator model
+ */
 DQ_robotics::CFFSerialRobot::CFFSerialRobot(const std::shared_ptr<DQ_SerialManipulator> &robot_arm)
     :kin_arm_{robot_arm}, arm_dim_configuration_space_{robot_arm->get_dim_configuration_space()}
 {
@@ -89,14 +93,23 @@ DQ_robotics::CFFSerialRobot::CFFSerialRobot(const std::shared_ptr<DQ_SerialManip
 }
 
 /**
- * @brief CFFSerialRobot::set_offset
- * @param x_b_a
+ * @brief CFFSerialRobot::set_offset Sets the offset transformation between the
+ *        base frame and the arm's mounting frame.
+ * @param x_b_a The offset as a unit dual quaternion from base to arm
  */
 void CFFSerialRobot::set_offset(const DQ &x_b_a)
 {
     x_b_a_ = x_b_a;
 }
 
+
+/**
+ * @brief CFFSerialRobot::get_six_dof_constraints Returns the equality constraints
+ *        for enforcing different base motion modes.
+ * @param mode The constraint mode (PLANAR_JOINT, STAND, or NONE)
+ * @return A tuple {Aeq, beq} representing the linear constraints Aeq * q_dot = beq
+ * @throws std::runtime_error if an invalid mode is provided
+ */
 std::tuple<MatrixXd, VectorXd> CFFSerialRobot::get_six_dof_constraints(const SIX_DOF_CONSTRAINT_MODE &mode)
 {
     MatrixXd Aeq = MatrixXd::Zero(3,dim_configuration_space_);
@@ -131,10 +144,13 @@ std::tuple<MatrixXd, VectorXd> CFFSerialRobot::get_six_dof_constraints(const SIX
 }
 
 /**
- * @brief CFFSerialRobot::fkm
- * @param q
- * @param ith
- * @return
+ * @brief CFFSerialRobot::fkm Computes the forward kinematics for a specific link.
+ * @param q configuration vector [vec8(base_pose), n-arm_joints] where:
+ *        - vec8(base_pose): 8 coefficients of the unit dual quaternion representing the floating base pose
+ *        - n-arm_joints: joint positions of the arm manipulator
+ * @param ith Link index
+ * @return The pose of the ith link as a dual quaternion
+ * @throws std::runtime_error if q size is incorrect or ith is out of range
  */
 DQ CFFSerialRobot::fkm(const VectorXd &q, const int &ith) const
 {
@@ -165,15 +181,28 @@ DQ CFFSerialRobot::fkm(const VectorXd &q, const int &ith) const
 }
 
 /**
- * @brief CFFSerialRobot::fkm
- * @param q
- * @return
+ * @brief CFFSerialRobot::fkm Computes the forward kinematics.
+ * @param q configuration vector [vec8(base_pose), n-arm_joints] where:
+ *        - vec8(base_pose): 8 coefficients of the unit dual quaternion representing the floating base pose
+ *        - n-arm_joints: joint positions of the arm manipulator
+ * @return The pose of the ith link as a dual quaternion
+ * @throws std::runtime_error if q size is incorrect or ith is out of range
  */
 DQ CFFSerialRobot::fkm(const VectorXd &q) const
 {
     return fkm(q, get_dim_configuration_space()-1);
 }
 
+
+/**
+ * @brief CFFSerialRobot::pose_jacobian Computes the pose Jacobian for a specific link.
+ * @param q configuration vector [vec8(base_pose), n-arm_joints] where:
+ *        - vec8(base_pose): 8 coefficients of the unit dual quaternion representing the floating base pose
+ *        - n-arm_joints: joint positions of the arm manipulator
+ * @param ith Link index
+ * @return The 8xn pose Jacobian matrix
+ * @throws std::runtime_error if q size is incorrect or ith is out of range
+ */
 MatrixXd CFFSerialRobot::pose_jacobian(const VectorXd &q, const int &ith) const
 {
     if (q.size() !=  8+arm_dim_configuration_space_)
@@ -208,16 +237,39 @@ MatrixXd CFFSerialRobot::pose_jacobian(const VectorXd &q, const int &ith) const
 
 }
 
+
+/**
+ * @brief CFFSerialRobot::pose_jacobian Computes the pose Jacobian for the end-effector.
+ * @param q configuration vector [vec8(base_pose), n-arm_joints] where:
+ *        - vec8(base_pose): 8 coefficients of the unit dual quaternion representing the floating base pose
+ *        - n-arm_joints: joint positions of the arm manipulator
+ * @return The 8xn pose Jacobian matrix for the end-effector
+ */
 MatrixXd CFFSerialRobot::pose_jacobian(const VectorXd &q) const
 {
     return pose_jacobian(q, get_dim_configuration_space()-1);
 }
 
+
+/**
+ * @brief CFFSerialRobot::get_dim_configuration_space Returns the dimension
+ *        of the configuration space (vec8(base_pose) + arm DOF).
+ * @return Total dimension of the configuration space
+ */
 int CFFSerialRobot::get_dim_configuration_space() const
 {
     return dim_configuration_space_;
 }
 
+
+/**
+ * @brief CFFSerialRobot::pose_jacobian_derivative Computes the time derivative
+ *        of the pose Jacobian for a specific link.
+ * @note This method is currently not implemented and will throw an exception.
+ * @param q configuration vector [vec8(base_pose), n-arm_joints]
+ * @param q_dot configuration velocity vector
+ * @param to_ith_link Target link index
+ */
 MatrixXd CFFSerialRobot::pose_jacobian_derivative([[maybe_unused]] const VectorXd &q,
                                                   [[maybe_unused]] const VectorXd &q_dot,
                                                   [[maybe_unused]] const int &to_ith_link) const
@@ -225,6 +277,14 @@ MatrixXd CFFSerialRobot::pose_jacobian_derivative([[maybe_unused]] const VectorX
     throw std::runtime_error("pose_jacobian_derivative is not implemented yet.");
 }
 
+
+/**
+ * @brief CFFSerialRobot::pose_jacobian_derivative Computes the time derivative
+ *        of the pose Jacobian for the end-effector.
+ * @note This method is currently not implemented and will throw an exception.
+ * @param q configuration vector [vec8(base_pose), n-arm_joints]
+ * @param q_dot configuration velocity vector
+ */
 MatrixXd CFFSerialRobot::pose_jacobian_derivative(const VectorXd &q, const VectorXd &q_dot) const
 {
     return pose_jacobian_derivative(q, q_dot, get_dim_configuration_space()-1);
