@@ -31,20 +31,19 @@ namespace DQ_robotics
 
 /**
  * @brief _hstack stacks matrices in sequence horizontally
- * @param A
- * @param B
- * @return The matrix [A B]
+ * @param A First matrix
+ * @param B Second matrix
+ * @return The matrix [A B] with same number of rows as A and B
  */
 MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
 
 /**
- * @brief _resize resizes a matrix A to a larger matrix of size (rowsxcols) that containts
+ * @brief _resize resizes a matrix A to a larger matrix of size (rowsxcols) that contains
  *               the matrix A. The additional elements are zeros.
- * @param A
- * @param rows
- * @param cols
- * @return The matrix [A 0
- *                     0 0]
+ * @param A Input matrix to be resized
+ * @param rows Desired number of rows (must be >= A.rows())
+ * @param cols Desired number of columns (must be >= A.cols())
+ * @return The resized matrix [A 0; 0 0]
  */
 MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols);
 
@@ -95,6 +94,11 @@ MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
     return aux;
 }
 
+/**
+ * @brief UnitreeB1Z1MobileRobot::UnitreeB1Z1MobileRobot Constructor that initializes
+ *        the mobile manipulator consisting of a holonomic base and a Z1 robotic arm.
+ *        Sets up the kinematic components and initializes selection matrices.
+ */
 UnitreeB1Z1MobileRobot::UnitreeB1Z1MobileRobot()
 {
     kin_arm_ = std::make_shared<DQ_SerialManipulatorDH>(UnitreeZ1Robot::kinematics());
@@ -111,6 +115,14 @@ UnitreeB1Z1MobileRobot::UnitreeB1Z1MobileRobot()
     I6x6_ = MatrixXd::Identity(6,6);
 }
 
+
+/**
+ * @brief UnitreeB1Z1MobileRobot::fkm Computes the forward kinematics for a specific link.
+ * @param q Joint configuration vector [base_x, base_y, base_theta, arm_joints(6)]
+ * @param ith Link index (range: 2 to 8, where 2 is the base link and 8 is the end-effector)
+ * @return The pose of the ith link as a dual quaternion
+ * @throws std::runtime_error if ith is out of range [2, 8]
+ */
 DQ UnitreeB1Z1MobileRobot::fkm(const VectorXd &q, const int &ith) const
 {
     VectorXd qbase = q.head(3);
@@ -130,11 +142,25 @@ DQ UnitreeB1Z1MobileRobot::fkm(const VectorXd &q, const int &ith) const
 
 }
 
+
+/**
+ * @brief UnitreeB1Z1MobileRobot::fkm Computes the forward kinematics for the end-effector.
+ * @param q Joint configuration vector [base_x, base_y, base_theta, arm_joints(6)]
+ * @return The pose of the end-effector as a dual quaternion
+ */
 DQ UnitreeB1Z1MobileRobot::fkm(const VectorXd &q) const
 {
     return fkm(q, get_dim_configuration_space()-1);
 }
 
+
+/**
+ * @brief UnitreeB1Z1MobileRobot::pose_jacobian Computes the pose Jacobian for a specific link.
+ * @param q Joint configuration vector [base_x, base_y, base_theta, arm_joints(6)]
+ * @param ith Link index (range: 2 to 8)
+ * @return The 8x9 pose Jacobian matrix mapping joint velocities to twist coordinates
+ * @throws std::runtime_error if ith is out of range [2, 8]
+ */
 MatrixXd UnitreeB1Z1MobileRobot::pose_jacobian(const VectorXd &q, const int &ith) const
 {
     VectorXd qbase = q.head(3);
@@ -160,16 +186,34 @@ MatrixXd UnitreeB1Z1MobileRobot::pose_jacobian(const VectorXd &q, const int &ith
     return J;
 }
 
+
+/**
+ * @brief UnitreeB1Z1MobileRobot::pose_jacobian Computes the pose Jacobian for the end-effector.
+ * @param q Joint configuration vector [base_x, base_y, base_theta, arm_joints(6)]
+ * @return The 8x9 pose Jacobian matrix for the end-effector
+ */
 MatrixXd UnitreeB1Z1MobileRobot::pose_jacobian(const VectorXd &q) const
 {
     return pose_jacobian(q, get_dim_configuration_space()-1);
 }
 
+/**
+ * @brief UnitreeB1Z1MobileRobot::get_dim_configuration_space Returns the dimension
+ *        of the configuration space (9 DOF: 3 for base + 6 for arm).
+ * @return Integer 9 representing the total DOF
+ */
 int UnitreeB1Z1MobileRobot::get_dim_configuration_space() const
 {
     return dim_configuration_space_;
 }
 
+/**
+ * @brief UnitreeB1Z1MobileRobot::pose_jacobian_derivative Computes the time derivative
+ *        of the pose Jacobian (currently not implemented).
+ * @param q Joint configuration vector
+ * @param q_dot Joint velocity vector
+ * @param to_ith_link Target link index
+ */
 MatrixXd UnitreeB1Z1MobileRobot::pose_jacobian_derivative([[maybe_unused]] const VectorXd &q,
                                                           [[maybe_unused]] const VectorXd &q_dot,
                                                           [[maybe_unused]] const int &to_ith_link) const
@@ -177,16 +221,33 @@ MatrixXd UnitreeB1Z1MobileRobot::pose_jacobian_derivative([[maybe_unused]] const
     throw std::runtime_error("pose_jacobian_derivative is not implemented yet.");
 }
 
+/**
+ * @brief UnitreeB1Z1MobileRobot::pose_jacobian_derivative Computes the time derivative
+ *        of the pose Jacobian for the end-effector (not implemented).
+ * @param q Joint configuration vector
+ * @param q_dot Joint velocity vector
+ * @throws std::runtime_error Always throws as this method is not implemented
+ */
 MatrixXd UnitreeB1Z1MobileRobot::pose_jacobian_derivative(const VectorXd &q, const VectorXd &q_dot) const
 {
     return pose_jacobian_derivative(q, q_dot, get_dim_configuration_space()-1);
 }
 
+/**
+ * @brief UnitreeB1Z1MobileRobot::update_base_offset Updates the base offset between
+ *        the mobile base and the first arm joint.
+ * @param X_J1_OFFSET The new offset as a unit dual quaternion
+ */
 void UnitreeB1Z1MobileRobot::update_base_offset(const DQ &X_J1_OFFSET)
 {
     X_J1_OFFSET_ = X_J1_OFFSET;
 }
 
+/**
+ * @brief UnitreeB1Z1MobileRobot::update_base_height_from_IMU Updates the base height
+ *        offset using IMU data (extracts height from the z-component of IMU translation).
+ * @param X_IMU The IMU pose as a unit dual quaternion
+ */
 void UnitreeB1Z1MobileRobot::update_base_height_from_IMU(const DQ &X_IMU)
 {
     VectorXd p_IMU = X_IMU.translation().vec3();

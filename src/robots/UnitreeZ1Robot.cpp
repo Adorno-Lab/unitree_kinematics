@@ -54,6 +54,12 @@ MatrixXd _get_dh_matrix()
     return raw_dh_matrix;
 }
 
+
+/**
+ * @brief _get_effector Computes the end-effector offset as a unit dual quaternion.
+ *                      The offset is defined as a translation of 0.2 units along the z-axis.
+ * @return A unit dual quaternion representing the end-effector offset.
+ */
 DQ _get_effector()
 {
     DQ effector_ = 1 + 0.5*E_*0.2*k_;
