@@ -4,6 +4,10 @@
 
 [DQ Robotics](https://dqrobotics.github.io) kinematic models of Unitree robots, plus the matching CoppeliaSim (ZeroMQ remote API) robot class.
 
+```shell
+git clone https://github.com/Adorno-Lab/unitree_kinematics.git
+cd unitree_kinematics
+```
 
 # Install
 
@@ -27,9 +31,6 @@ If you install any of these without sudo, put them in the same custom prefix (`~
 ## Sudo users
 
 ```shell
-git clone https://github.com/Adorno-Lab/unitree_kinematics.git
-cd unitree_kinematics
-
 # 1. Configure: choose Release, and (optionally) where to install it.
 #    Omit -DCMAKE_INSTALL_PREFIX to use the system default (/usr/local on Linux).
 cmake -S . -B build \
@@ -53,8 +54,6 @@ sudo cmake --install build
 ## Non-sudo users
 
 ```shell
-git clone https://github.com/Adorno-Lab/unitree_kinematics.git
-cd unitree_kinematics
 
 # 1. Configure: choose Release, and install to your own prefix instead of a system path.
 #    CMAKE_PREFIX_PATH lets CMake find dependencies you also installed there.
