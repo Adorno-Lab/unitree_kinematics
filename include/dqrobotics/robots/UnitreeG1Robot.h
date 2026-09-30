@@ -26,6 +26,30 @@
 
 namespace DQ_robotics
 {
+/**
+ * Example of usage (DH parameters derived from Unitree's g1_29dof.urdf):
+ *
+ *       auto left_arm_robot  = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::LEFT_ARM);
+ *       auto right_arm_robot = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::RIGHT_ARM);
+ *       auto left_leg_robot  = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::LEFT_LEG);
+ *       auto right_leg_robot = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::RIGHT_LEG);
+ *       auto waist_robot     = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::WAIST);
+ *
+ *       VectorXd q_waist     = VectorXd::Zero(3);
+ *       VectorXd q_left_arm  = VectorXd::Zero(7);
+ *       VectorXd q_right_arm = VectorXd::Zero(7);
+ *       VectorXd q_left_leg  = VectorXd::Zero(6);
+ *       VectorXd q_right_leg = VectorXd::Zero(6);
+ *
+ *       // Pelvis pose in the world frame (here: nominal standing height, feet on the ground).
+ *       DQ pelvis_frame = 1 + 0.5*E_*0.79227*k_;
+ *
+ *       DQ x_waist     = pelvis_frame*waist_robot.fkm(q_waist);        // torso_link
+ *       DQ x_left_arm  = x_waist*left_arm_robot.fkm(q_left_arm);       // left_rubber_hand (palm)
+ *       DQ x_right_arm = x_waist*right_arm_robot.fkm(q_right_arm);     // right_rubber_hand (palm)
+ *       DQ x_left_leg  = pelvis_frame*left_leg_robot.fkm(q_left_leg);  // left_ankle_roll_link
+ *       DQ x_right_leg = pelvis_frame*right_leg_robot.fkm(q_right_leg);// right_ankle_roll_link
+ */
 class UnitreeG1Robot
 {
 public:
