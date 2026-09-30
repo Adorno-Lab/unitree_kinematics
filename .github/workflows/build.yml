@@ -1,0 +1,120 @@
+# Builds, installs, and smoke-tests unitree_kinematics on every push.
+#
+# WHAT IT CHECKS
+#   1. The library compiles with warnings treated as errors.
+#   2. `cmake --install` into a non-sudo prefix produces the expected layout
+#      (headers only under their subfolders, CMake package files present).
+#   3. A separate project finds it with find_package(), the kinematic models
+#      run correctly, and the CoppeliaSim class compiles and links
+#      (tests/find_package). CoppeliaSim itself is not needed.
+#   4. Uninstalling via install_manifest.txt removes every installed file.
+#
+# WHY UBUNTU 24.04 ONLY
+#   The DQ Robotics PPA's jammy (22.04) build of
+#   libdqrobotics-interface-coppeliasim-zmq is older (2024-11) and its API is
+#   incompatible with UnitreeB1Z1CoppeliaSimZMQRobot (e.g. no
+#   get_jointnames_from_object()), so 22.04 cannot build this library from the
+#   PPA alone.
+
+name: Build
+
+on:
+  push:
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ubuntu-24.04 (${{ matrix.build_type }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
+    env:
+      INSTALL_PREFIX: ${{ github.workspace }}/install
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # libzmq5 is listed explicitly because the PPA's
+      # libdqrobotics-interface-coppeliasim-zmq links against libzmq.so.5 but
+      # does not declare it as a dependency.
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository ppa:dqrobotics-dev/development -y
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake \
+            build-essential \
+            libeigen3-dev \
+            libzmq5 \
+            libdqrobotics \
+            libdqrobotics-interface-coppeliasim \
+            libdqrobotics-interface-coppeliasim-zmq
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
+            -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+
+      - name: Build
+        run: cmake --build build -j"$(nproc)"
+
+      - name: Install (non-sudo prefix)
+        run: cmake --install build
+
+      - name: Check install layout
+        run: |
+          set -eu
+          cfg="$INSTALL_PREFIX/lib/cmake/unitree_kinematics"
+          for f in \
+            "$INSTALL_PREFIX/include/dqrobotics/robots/UnitreeZ1Robot.h" \
+            "$INSTALL_PREFIX/include/dqrobotics/robots/UnitreeB1Z1MobileRobot.h" \
+            "$INSTALL_PREFIX/include/dqrobotics/robots/CFFSerialRobot.h" \
+            "$INSTALL_PREFIX/include/dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h" \
+            "$INSTALL_PREFIX/lib/libunitree_kinematics.so" \
+            "$cfg/unitree_kinematicsConfig.cmake" \
+            "$cfg/unitree_kinematicsConfigVersion.cmake" \
+            "$cfg/unitree_kinematicsTargets.cmake"
+          do
+            test -e "$f" || { echo "::error::missing $f"; exit 1; }
+          done
+          # Headers must not be duplicated flat into include/dqrobotics/, and
+          # sources must not be installed.
+          stray=$(find "$INSTALL_PREFIX/include/dqrobotics" -maxdepth 1 -type f)
+          if [ -n "$stray" ]; then echo "::error::stray headers: $stray"; exit 1; fi
+          if [ -d "$INSTALL_PREFIX/src" ]; then echo "::error::sources were installed"; exit 1; fi
+          echo "Install layout OK"
+
+      - name: Build smoke test with find_package()
+        run: |
+          cmake -S tests/find_package -B build-test \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" \
+            -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+          cmake --build build-test
+
+      - name: Run smoke test
+        env:
+          LD_LIBRARY_PATH: ${{ env.INSTALL_PREFIX }}/lib
+        run: ./build-test/find_package_test
+
+      - name: Uninstall
+        run: |
+          set -eu
+          xargs rm -v < build/install_manifest.txt
+          left=$(find "$INSTALL_PREFIX" -type f)
+          if [ -n "$left" ]; then echo "::error::files left after uninstall: $left"; exit 1; fi
+          echo "Uninstall OK"
