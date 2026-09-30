@@ -88,17 +88,6 @@ CMake records every installed file in `build/install_manifest.txt`:
 xargs rm -v < build/install_manifest.txt   # prefix with sudo for system installs
 ```
 
-> [!IMPORTANT]
-> **Upgrading from an install made before the CMake package was added?** The old
-> `CMakeLists.txt` also copied every header flat into `include/dqrobotics/` and the
-> sources into `src/dqrobotics/`. Remove those leftovers (shown for `/usr/local`):
-> ```shell
-> sudo rm -v /usr/local/include/dqrobotics/{UnitreeZ1Robot,UnitreeB1Z1MobileRobot,CFFSerialRobot,UnitreeB1Z1CoppeliaSimZMQRobot}.h
-> sudo rm -v /usr/local/src/dqrobotics/robots/{UnitreeZ1Robot,UnitreeB1Z1MobileRobot,CFFSerialRobot}.cpp \
->            /usr/local/src/dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.cpp
-> ```
-
-
 # Usage
 
 ```cmake
