@@ -2,7 +2,7 @@
 
 # unitree_kinematics
 
-[DQ Robotics](https://dqrobotics.github.io) kinematic models of Unitree robots, plus the matching CoppeliaSim (ZeroMQ remote API) robot class.
+[DQ Robotics](https://dqrobotics.github.io) kinematic models of Unitree robots (Z1 arm, B1 + Z1 mobile manipulator, and the G1 humanoid's arms, waist, and legs), plus the matching CoppeliaSim (ZeroMQ remote API) robot class.
 
 ```shell
 git clone https://github.com/Adorno-Lab/unitree_kinematics.git
@@ -100,6 +100,7 @@ interface, and Eigen3 dependencies, so you don't need to link those separately.
 ```cpp
 #include <dqrobotics/robots/UnitreeZ1Robot.h>
 #include <dqrobotics/robots/UnitreeB1Z1MobileRobot.h>
+#include <dqrobotics/robots/UnitreeG1Robot.h>
 #include <dqrobotics/robots/CFFSerialRobot.h>
 #include <dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h>
 
@@ -107,4 +108,10 @@ using namespace DQ_robotics;
 
 auto z1 = UnitreeZ1Robot::kinematics();          // DQ_SerialManipulatorDH, 6 DoF
 UnitreeB1Z1MobileRobot b1z1;                     // 9 DoF (3 base + 6 arm)
+
+// G1 humanoid: one DQ_SerialManipulatorDH per limb.
+// Arms: 7 DoF (base frame: torso_link). Waist: 3 DoF. Legs: 6 DoF (base frame: pelvis).
+auto g1_left_arm = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::LEFT_ARM);
+auto g1_waist    = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::WAIST);
+auto g1_left_leg = UnitreeG1Robot::kinematics(UnitreeG1Robot::LIMB::LEFT_LEG);
 ```
