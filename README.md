@@ -4,13 +4,6 @@
 
 [DQ Robotics](https://dqrobotics.github.io) kinematic models of Unitree robots, plus the matching CoppeliaSim (ZeroMQ remote API) robot class.
 
-| Header | Class | Description |
-| --- | --- | --- |
-| `dqrobotics/robots/UnitreeZ1Robot.h` | `UnitreeZ1Robot` | DH kinematic model of the Unitree Z1 arm (`UnitreeZ1Robot::kinematics()`). |
-| `dqrobotics/robots/UnitreeB1Z1MobileRobot.h` | `UnitreeB1Z1MobileRobot` | Unitree B1 + Z1 modeled as a holonomic mobile manipulator. |
-| `dqrobotics/robots/CFFSerialRobot.h` | `CFFSerialRobot` | Serial arm mounted on a constrained free-flying (6-DoF) base. |
-| `dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h` | `UnitreeB1Z1CoppeliaSimZMQRobot` | B1 + Z1 in CoppeliaSim, as a holonomic or CFF model. |
-
 
 # Install
 
