@@ -82,6 +82,7 @@ jobs:
           for f in \
             "$INSTALL_PREFIX/include/dqrobotics/robots/UnitreeZ1Robot.h" \
             "$INSTALL_PREFIX/include/dqrobotics/robots/UnitreeB1Z1MobileRobot.h" \
+            "$INSTALL_PREFIX/include/dqrobotics/robots/UnitreeG1Robot.h" \
             "$INSTALL_PREFIX/include/dqrobotics/robots/CFFSerialRobot.h" \
             "$INSTALL_PREFIX/include/dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h" \
             "$INSTALL_PREFIX/lib/libunitree_kinematics.so" \

@@ -8,12 +8,14 @@
  */
 #include <dqrobotics/robots/UnitreeZ1Robot.h>
 #include <dqrobotics/robots/UnitreeB1Z1MobileRobot.h>
+#include <dqrobotics/robots/UnitreeG1Robot.h>
 #include <dqrobotics/robots/CFFSerialRobot.h>
 #include <dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h>
 
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 
 using namespace DQ_robotics;
 
@@ -80,6 +82,21 @@ int main()
     VectorXd q_b1z1(9);
     q_b1z1 << 0.3, -0.2, 0.5, q_arm;
     check_model("UnitreeB1Z1MobileRobot", b1z1, q_b1z1, 9);
+
+    // G1: one serial chain per limb.
+    const std::pair<std::string, std::pair<UnitreeG1Robot::LIMB, int>> g1_limbs[] = {
+        {"LEFT_ARM",  {UnitreeG1Robot::LIMB::LEFT_ARM,  7}},
+        {"RIGHT_ARM", {UnitreeG1Robot::LIMB::RIGHT_ARM, 7}},
+        {"WAIST",     {UnitreeG1Robot::LIMB::WAIST,     3}},
+        {"LEFT_LEG",  {UnitreeG1Robot::LIMB::LEFT_LEG,  6}},
+        {"RIGHT_LEG", {UnitreeG1Robot::LIMB::RIGHT_LEG, 6}},
+    };
+    for (const auto& [limb_name, limb] : g1_limbs)
+    {
+        const auto chain = UnitreeG1Robot::kinematics(limb.first);
+        check_model("UnitreeG1Robot " + limb_name, chain,
+                    VectorXd::LinSpaced(limb.second, 0.1, 0.5), limb.second);
+    }
 
     // q = [vec8(base pose), arm joints] (14 entries), while the configuration
     // space (and the Jacobian's columns) is 6 base twist DoF + 6 arm DoF.

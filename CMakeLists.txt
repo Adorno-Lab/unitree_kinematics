@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(unitree_kinematics
     VERSION 0.1.0
-    DESCRIPTION "DQ Robotics kinematic models of Unitree robots (Z1, B1+Z1) and their CoppeliaSim ZMQ counterparts"
+    DESCRIPTION "DQ Robotics kinematic models of Unitree robots (Z1, B1+Z1, G1) and their CoppeliaSim ZMQ counterparts"
     LANGUAGES CXX
 )
 
@@ -73,6 +73,7 @@ add_library(unitree_kinematics
     src/robots/CFFSerialRobot.cpp
     src/robots/UnitreeZ1Robot.cpp
     src/robots/UnitreeB1Z1MobileRobot.cpp
+    src/robots/UnitreeG1Robot.cpp
     src/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.cpp
 )
 add_library(unitree_kinematics::unitree_kinematics ALIAS unitree_kinematics)
