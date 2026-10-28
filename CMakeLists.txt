@@ -75,6 +75,7 @@ add_library(unitree_kinematics
     src/robots/UnitreeB1Z1MobileRobot.cpp
     src/robots/UnitreeG1Robot.cpp
     src/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.cpp
+    src/robot_modeling/DQ_FreeFloatingBase.cpp
 )
 add_library(unitree_kinematics::unitree_kinematics ALIAS unitree_kinematics)
 
