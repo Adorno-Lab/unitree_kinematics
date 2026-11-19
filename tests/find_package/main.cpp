@@ -11,6 +11,7 @@
 #include <dqrobotics/robots/UnitreeG1Robot.h>
 #include <dqrobotics/robots/CFFSerialRobot.h>
 #include <dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h>
+#include <dqrobotics/robot_modeling/DQ_FreeFlyingRobot.h>
 
 #include <iostream>
 #include <memory>
@@ -42,6 +43,7 @@ void check_model(const std::string& name, const DQ_Kinematics& robot,
 
     const MatrixXd J = robot.pose_jacobian(q);
     check(J.rows() == 8 && J.cols() == n, name + " pose_jacobian(q) is 8x" + std::to_string(n));
+
 }
 
 } // namespace
@@ -105,6 +107,11 @@ int main()
     VectorXd q_cff(14);
     q_cff << vec8(x_base), q_arm;
     check_model("CFFSerialRobot", cff, q_cff, 12);
+
+    // q = [vec8(base pose)]
+    // u = [vec8(base twist)]
+    const DQ_FreeFlyingRobot free_flying;
+    check_model("DQ_FreeFlyingRobot", free_flying, vec8(x_base), 8);
 
     // Reaching this point means coppeliasim_compile_and_link_check() compiled
     // and linked; it is deliberately not run.
