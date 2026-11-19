@@ -15,14 +15,24 @@
 #    If not, see <https://www.gnu.org/licenses/>.
 #
 # ################################################################
+#    Contributors:
 #
-#   Author: Daniel S. J. Derwent (email: daniel.derwent@manchester.ac.uk)
+#    1. Bruno Vilhena Adorno (bruno.adorno@manchester.ac.uk)
+#       Responsible for the original implementation in file DQ_FreeFlyingRobot.m
+#       https://github.com/dqrobotics/matlab/pull/66/commits
+#
+#    2. Juan Jose Quiroz Omana (juanjose.quirozomana@manchester.ac.uk)
+#       Created the first version of this class for C++, from which this
+#       version was adapted.
+#
+#    3. Daniel S. J. Derwent (daniel.derwent@manchester.ac.uk)
+#       Adapted Juan's C++ class into the version below.
 #
 # ################################################################
 */
 
-#ifndef DQ_ROBOTICS_ROBOT_MODELING_DQ_FREEFLOATINGBASE
-#define DQ_ROBOTICS_ROBOT_MODELING_DQ_FREEFLOATINGBASE
+#ifndef DQ_ROBOTICS_ROBOT_MODELING_DQ_FREEFLYINGROBOT
+#define DQ_ROBOTICS_ROBOT_MODELING_DQ_FREEFLYINGROBOT
 
 #include<dqrobotics/DQ.h>
 #include<dqrobotics/robot_modeling/DQ_MobileBase.h>
@@ -31,11 +41,11 @@ namespace DQ_robotics
 {
 
 
-class DQ_FreeFloatingBase: public DQ_MobileBase
+class DQ_FreeFlyingRobot: public DQ_MobileBase
 {
 public:
     // Constructor
-    DQ_FreeFloatingBase();
+    DQ_FreeFlyingRobot();
 
     // Virtual method overrides
     virtual DQ fkm(const VectorXd& q) const override;
@@ -45,12 +55,15 @@ public:
     virtual MatrixXd pose_jacobian_derivative(const VectorXd& q, const VectorXd& q_dot, const int& to_link) const override;
     virtual MatrixXd pose_jacobian_derivative(const VectorXd& q, const VectorXd& q_dot) const override;
 
+    // New public methods
+    int get_len_config_vector() const;
+    int get_len_control_input_vector() const;
+
 private:
 
     // Private methods for input validation
-    void _check_q(const VectorXd& q) const;
-    void _check_q_dot(const VectorXd& q_dot) const;
-    void _check_link(const int& link) const;
+    void _check_pose(const VectorXd& q) const;
+    void _check_pose_derivative(const VectorXd& q_dot) const;
 };
 
 }

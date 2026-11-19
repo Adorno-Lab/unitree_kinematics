@@ -11,7 +11,7 @@
 #include <dqrobotics/robots/UnitreeG1Robot.h>
 #include <dqrobotics/robots/CFFSerialRobot.h>
 #include <dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h>
-#include <dqrobotics/robot_modeling/DQ_FreeFloatingBase.h>
+#include <dqrobotics/robot_modeling/DQ_FreeFlyingRobot.h>
 
 #include <iostream>
 #include <memory>
@@ -33,7 +33,7 @@ void check(bool condition, const std::string& what)
 }
 
 void check_model(const std::string& name, const DQ_Kinematics& robot,
-                 const VectorXd& q, int expected_dim, std::string j_cols_given_by = "n")
+                 const VectorXd& q, int expected_dim)
 {
     const int n = robot.get_dim_configuration_space();
     check(n == expected_dim,
@@ -42,15 +42,8 @@ void check_model(const std::string& name, const DQ_Kinematics& robot,
     check(is_unit(robot.fkm(q)), name + " fkm(q) is a unit dual quaternion");
 
     const MatrixXd J = robot.pose_jacobian(q);
-    if(j_cols_given_by=="n"){
-        check(J.rows() == 8 && J.cols() == n, name + " pose_jacobian(q) is 8x" + std::to_string(n));
-    }
-    else if(j_cols_given_by=="q"){
-        check(J.rows() == 8 && J.cols() == q.size(), name + " pose_jacobian(q) is 8x" + std::to_string(q.size()));
-    }
-    else{
-        throw std::runtime_error("j_cols_given_by must be either 'n' or 'q'");
-    }
+    check(J.rows() == 8 && J.cols() == n, name + " pose_jacobian(q) is 8x" + std::to_string(n));
+
 }
 
 } // namespace
@@ -116,11 +109,9 @@ int main()
     check_model("CFFSerialRobot", cff, q_cff, 12);
 
     // q = [vec8(base pose)]
-    const DQ_FreeFloatingBase free_floating;
-    DQ r = cos(0.25) + k_*sin(0.25);
-    DQ p = 0.3*i_ - 0.2*j_ + 0.4*k_;
-    DQ ff_x = r + (0.5 * E_ * p * r);
-    check_model("DQ_FreeFloatingBase", free_floating, vec8(x_base), 6, "q");
+    // u = [vec8(base twist)]
+    const DQ_FreeFlyingRobot free_flying;
+    check_model("DQ_FreeFlyingRobot", free_flying, vec8(x_base), 8);
 
     // Reaching this point means coppeliasim_compile_and_link_check() compiled
     // and linked; it is deliberately not run.
