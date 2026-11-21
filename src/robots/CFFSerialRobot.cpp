@@ -1,12 +1,18 @@
 #include <dqrobotics/robots/CFFSerialRobot.h>
 
+namespace DQ_robotics
+{
+
+// Internal helper functions are static (internal linkage) so they are not exported from the
+// shared library and cannot clash with same-named symbols in other files or libraries.
+
 /**
  * @brief _hstack stacks matrices in sequence horizontally
  * @param A First matrix
  * @param B Second matrix
  * @return The matrix [A B]
  */
-MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
+static MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
 
 
 /**
@@ -17,12 +23,12 @@ MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
  * @param cols Desired number of columns (must be >= A.cols())
  * @return The resized matrix [A 0; 0 0]
  */
-MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols);
+static MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols);
 
 
 
 
-MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
+static MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
 {
     MatrixXd aux = MatrixXd::Zero(rows, cols);
     int m = A.rows();
@@ -47,7 +53,7 @@ MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
     return aux;
 }
 
-MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B)
+static MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B)
 {
 
     int m_A = A.rows();
@@ -65,10 +71,6 @@ MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B)
     C.block(0, n_A, m_B, n_B) = B;
     return C;
 }
-
-
-namespace DQ_robotics
-{
 
 
 /**
