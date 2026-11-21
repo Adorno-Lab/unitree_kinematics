@@ -27,21 +27,14 @@
 namespace DQ_robotics
 {
 
+// Internal helper functions are static (internal linkage) so they are not exported from the
+// shared library and cannot clash with same-named symbols in other files or libraries.
+
 /**
  * @brief _get_dh_matrix gets the DH matrix of the Unitree Z1 manipulator
  * @return the DH matrix (including a row describing the joint types).
  */
-DQ _get_effector();
-
-
-/**
- * @brief _get_effector gets the end-effector offset.
- * @return A unit dual quaternion that represents the end-effector offset.
- */
-MatrixXd _get_dh_matrix();
-
-
-MatrixXd _get_dh_matrix()
+static MatrixXd _get_dh_matrix()
 {
     const double pi = M_PI;
     Matrix<double,5,6> raw_dh_matrix(5,6);
@@ -60,7 +53,7 @@ MatrixXd _get_dh_matrix()
  *                      The offset is defined as a translation of 0.2 units along the z-axis.
  * @return A unit dual quaternion representing the end-effector offset.
  */
-DQ _get_effector()
+static DQ _get_effector()
 {
     DQ effector_ = 1 + 0.5*E_*0.2*k_;
     return effector_;
