@@ -35,15 +35,17 @@ namespace DQ_robotics
 const double shoulder_tilt = 0.43633;
 const double forearm_length = 0.270; // Estimated based on measurements of STL file
 
-DQ _get_arm_base_offset(const std::string left_or_right);
-DQ _get_leg_base_offset(const std::string left_or_right);
-DQ_SerialManipulatorDH _get_arm(const std::string left_or_right);
-DQ_SerialManipulatorDH _get_leg(const std::string left_or_right);
-DQ_SerialManipulatorDH _get_h1_waist_chain();
-DQ_SerialManipulatorDH _get_h1_left_leg_chain();
-DQ_SerialManipulatorDH _get_h1_right_leg_chain();
-DQ_SerialManipulatorDH _get_h1_right_arm_chain();
-DQ_SerialManipulatorDH _get_h1_left_arm_chain();
+// Internal helper functions are static (internal linkage) so they are not exported from the
+// shared library and cannot clash with same-named symbols in other files or libraries.
+static DQ _get_arm_base_offset(const std::string left_or_right);
+static DQ _get_leg_base_offset(const std::string left_or_right);
+static DQ_SerialManipulatorDH _get_arm(const std::string left_or_right);
+static DQ_SerialManipulatorDH _get_leg(const std::string left_or_right);
+static DQ_SerialManipulatorDH _get_h1_waist_chain();
+static DQ_SerialManipulatorDH _get_h1_left_leg_chain();
+static DQ_SerialManipulatorDH _get_h1_right_leg_chain();
+static DQ_SerialManipulatorDH _get_h1_right_arm_chain();
+static DQ_SerialManipulatorDH _get_h1_left_arm_chain();
 
 DQ_SerialManipulatorDH UnitreeH1Robot::kinematics(const LIMB& limb)
 {
@@ -65,7 +67,7 @@ DQ_SerialManipulatorDH UnitreeH1Robot::kinematics(const LIMB& limb)
 }
 
 // Helper functions to get arm and leg parameters.
-DQ _get_arm_base_offset(const std::string left_or_right)
+static DQ _get_arm_base_offset(const std::string left_or_right)
 {
     int side_sign;
     if(left_or_right == "left"){
@@ -85,7 +87,7 @@ DQ _get_arm_base_offset(const std::string left_or_right)
     return rotation + E_ * 0.5 * translation * rotation;
 }
 
-DQ_SerialManipulatorDH _get_arm(const std::string left_or_right)
+static DQ_SerialManipulatorDH _get_arm(const std::string left_or_right)
 {
     int side_sign;
     Eigen::Vector4d lower, upper;
@@ -118,7 +120,7 @@ DQ_SerialManipulatorDH _get_arm(const std::string left_or_right)
     return arm;
 }
 
-DQ _get_leg_base_offset(const std::string left_or_right)
+static DQ _get_leg_base_offset(const std::string left_or_right)
 {
     int side_sign;
     if(left_or_right == "left"){
@@ -137,7 +139,7 @@ DQ _get_leg_base_offset(const std::string left_or_right)
     return rotation + E_ * 0.5 * translation * rotation;
 }
 
-DQ_SerialManipulatorDH _get_leg(const std::string left_or_right)
+static DQ_SerialManipulatorDH _get_leg(const std::string left_or_right)
 {
     int side_sign;
     Eigen::Matrix<double, 5, 1> lower, upper;
@@ -171,7 +173,7 @@ DQ_SerialManipulatorDH _get_leg(const std::string left_or_right)
 }
 
 // Limb getter functions
-DQ_SerialManipulatorDH _get_h1_waist_chain()
+static DQ_SerialManipulatorDH _get_h1_waist_chain()
 {
     Eigen::Matrix<double, 5, 1> waist_dh;
     waist_dh << 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -187,7 +189,7 @@ DQ_SerialManipulatorDH _get_h1_waist_chain()
     return h1_waist;
 }
 
-DQ_SerialManipulatorDH _get_h1_left_leg_chain()
+static DQ_SerialManipulatorDH _get_h1_left_leg_chain()
 {
     DQ_SerialManipulatorDH h1_left_leg = _get_leg("left");
     h1_left_leg.set_reference_frame(_get_leg_base_offset("left"));
@@ -196,7 +198,7 @@ DQ_SerialManipulatorDH _get_h1_left_leg_chain()
     return h1_left_leg;
 }
 
-DQ_SerialManipulatorDH _get_h1_right_leg_chain()
+static DQ_SerialManipulatorDH _get_h1_right_leg_chain()
 {
     DQ_SerialManipulatorDH h1_right_leg = _get_leg("right");
     h1_right_leg.set_reference_frame(_get_leg_base_offset("right"));
@@ -205,7 +207,7 @@ DQ_SerialManipulatorDH _get_h1_right_leg_chain()
     return h1_right_leg;
 }
 
-DQ_SerialManipulatorDH _get_h1_right_arm_chain()
+static DQ_SerialManipulatorDH _get_h1_right_arm_chain()
 {
     DQ_SerialManipulatorDH h1_right_arm = _get_arm("right");
     h1_right_arm.set_reference_frame(_get_arm_base_offset("right"));
@@ -214,7 +216,7 @@ DQ_SerialManipulatorDH _get_h1_right_arm_chain()
     return h1_right_arm;
 }
 
-DQ_SerialManipulatorDH _get_h1_left_arm_chain()
+static DQ_SerialManipulatorDH _get_h1_left_arm_chain()
 {
     DQ_SerialManipulatorDH h1_left_arm = _get_arm("left");
     h1_left_arm.set_reference_frame(_get_arm_base_offset("left"));

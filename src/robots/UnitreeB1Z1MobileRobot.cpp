@@ -29,13 +29,16 @@
 namespace DQ_robotics
 {
 
+// Internal helper functions are static (internal linkage) so they are not exported from the
+// shared library and cannot clash with same-named symbols in other files or libraries.
+
 /**
  * @brief _hstack stacks matrices in sequence horizontally
  * @param A First matrix
  * @param B Second matrix
  * @return The matrix [A B] with same number of rows as A and B
  */
-MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
+static MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
 
 /**
  * @brief _resize resizes a matrix A to a larger matrix of size (rowsxcols) that contains
@@ -45,12 +48,12 @@ MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B);
  * @param cols Desired number of columns (must be >= A.cols())
  * @return The resized matrix [A 0; 0 0]
  */
-MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols);
+static MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols);
 
 
 
 
-MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B)
+static MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B)
 {
 
     int m_A = A.rows();
@@ -69,7 +72,7 @@ MatrixXd _hstack(const MatrixXd &A, const MatrixXd &B)
     return C;
 }
 
-MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
+static MatrixXd _resize(const MatrixXd &A, const int &rows, const int &cols)
 {
     MatrixXd aux = MatrixXd::Zero(rows, cols);
     int m = A.rows();

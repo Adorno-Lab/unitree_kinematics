@@ -17,7 +17,6 @@
 # ################################################################
 #
 #   Author: - Juan Jose Quiroz Omana (email: juanjose.quirozomana@manchester.ac.uk)
-#           - This code was reviewed and documented by Claude.
 #
 # ################################################################
 */
@@ -29,11 +28,13 @@
 namespace DQ_robotics
 {
 
-DQ_SerialManipulatorDH _get_g1_waist_chain();
-DQ_SerialManipulatorDH _get_g1_left_leg_chain();
-DQ_SerialManipulatorDH _get_g1_right_leg_chain();
-DQ_SerialManipulatorDH _get_g1_right_arm_chain();
-DQ_SerialManipulatorDH _get_g1_left_arm_chain();
+// Internal helper functions are static (internal linkage) so they are not exported from the
+// shared library and cannot clash with same-named symbols in other files or libraries.
+static DQ_SerialManipulatorDH _get_g1_waist_chain();
+static DQ_SerialManipulatorDH _get_g1_left_leg_chain();
+static DQ_SerialManipulatorDH _get_g1_right_leg_chain();
+static DQ_SerialManipulatorDH _get_g1_right_arm_chain();
+static DQ_SerialManipulatorDH _get_g1_left_arm_chain();
 
 
 
@@ -57,7 +58,7 @@ DQ_SerialManipulatorDH UnitreeG1Robot::kinematics(const LIMB& limb)
 }
 
 
-DQ_SerialManipulatorDH _get_g1_left_leg_chain()
+static DQ_SerialManipulatorDH _get_g1_left_leg_chain()
 {
     const double pi2 = M_PI/2;
 
@@ -97,7 +98,7 @@ DQ_SerialManipulatorDH _get_g1_left_leg_chain()
     return g1_left_leg;
 }
 
-DQ_SerialManipulatorDH _get_g1_waist_chain()
+static DQ_SerialManipulatorDH _get_g1_waist_chain()
 {
     const double pi2 = M_PI/2;
 
@@ -131,7 +132,7 @@ DQ_SerialManipulatorDH _get_g1_waist_chain()
     return g1_waist;
 }
 
-DQ_SerialManipulatorDH _get_g1_right_leg_chain()
+static DQ_SerialManipulatorDH _get_g1_right_leg_chain()
 {
     const double pi2 = M_PI/2;
 
@@ -168,7 +169,7 @@ DQ_SerialManipulatorDH _get_g1_right_leg_chain()
     return g1_right_leg;
 }
 
-DQ_SerialManipulatorDH _get_g1_right_arm_chain()
+static DQ_SerialManipulatorDH _get_g1_right_arm_chain()
 {
     const double pi2 = M_PI/2;
 
@@ -210,7 +211,7 @@ DQ_SerialManipulatorDH _get_g1_right_arm_chain()
     return g1_right_arm;
 }
 
-DQ_SerialManipulatorDH _get_g1_left_arm_chain()
+static DQ_SerialManipulatorDH _get_g1_left_arm_chain()
 {
     const double pi2 = M_PI/2;
 

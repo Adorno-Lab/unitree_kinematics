@@ -23,6 +23,8 @@
 
 #include "dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h"
 
+// Internal helper functions are static (internal linkage) so they are not exported from the
+// shared library and cannot clash with same-named symbols in other files or libraries.
 
 /**
  * @brief _vstack stacks matrices in sequence vertically
@@ -30,7 +32,7 @@
  * @param B Bottom matrix
  * @return The matrix [A; B] with same number of columns as A and B
  */
-MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B);
+static MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B);
 
 /**
  * @brief _vstack Vertically stacks two matrices with compatible column dimensions.
@@ -39,7 +41,7 @@ MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B);
  * @return The vertically stacked matrix [A; B]
  * @throws std::runtime_error if column dimensions of A and B don't match
  */
-MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B)
+static MatrixXd _vstack(const MatrixXd &A, const MatrixXd &B)
 {
     int m_A = A.rows();
     int m_B = B.rows();
