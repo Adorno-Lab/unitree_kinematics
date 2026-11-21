@@ -2,7 +2,7 @@
 
 # unitree_kinematics
 
-[DQ Robotics](https://dqrobotics.github.io) kinematic models of Unitree robots (Z1 arm, B1 + Z1 mobile manipulator, and the G1 humanoid's arms, waist, and legs), plus the matching CoppeliaSim (ZeroMQ remote API) robot class.
+[DQ Robotics](https://dqrobotics.github.io) kinematic models of Unitree robots (Z1 arm, B1 + Z1 mobile manipulator, and the G1/H1 humanoid's arms, waist, and legs), plus the matching CoppeliaSim (ZeroMQ remote API) robot class.
 
 ```shell
 git clone https://github.com/Adorno-Lab/unitree_kinematics.git

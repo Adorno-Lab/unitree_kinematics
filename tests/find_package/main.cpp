@@ -9,6 +9,7 @@
 #include <dqrobotics/robots/UnitreeZ1Robot.h>
 #include <dqrobotics/robots/UnitreeB1Z1MobileRobot.h>
 #include <dqrobotics/robots/UnitreeG1Robot.h>
+#include <dqrobotics/robots/UnitreeH1Robot.h>
 #include <dqrobotics/robots/CFFSerialRobot.h>
 #include <dqrobotics/interfaces/coppeliasim/robots/UnitreeB1Z1CoppeliaSimZMQRobot.h>
 
@@ -95,6 +96,21 @@ int main()
     {
         const auto chain = UnitreeG1Robot::kinematics(limb.first);
         check_model("UnitreeG1Robot " + limb_name, chain,
+                    VectorXd::LinSpaced(limb.second, 0.1, 0.5), limb.second);
+    }
+
+    // H1: one serial chain per limb.
+    const std::pair<std::string, std::pair<UnitreeH1Robot::LIMB, int>> h1_limbs[] = {
+        {"LEFT_ARM",  {UnitreeH1Robot::LIMB::LEFT_ARM,  4}},
+        {"RIGHT_ARM", {UnitreeH1Robot::LIMB::RIGHT_ARM, 4}},
+        {"WAIST",     {UnitreeH1Robot::LIMB::WAIST,     1}},
+        {"LEFT_LEG",  {UnitreeH1Robot::LIMB::LEFT_LEG,  5}},
+        {"RIGHT_LEG", {UnitreeH1Robot::LIMB::RIGHT_LEG, 5}},
+    };
+    for (const auto& [limb_name, limb] : h1_limbs)
+    {
+        const auto chain = UnitreeH1Robot::kinematics(limb.first);
+        check_model("UnitreeH1Robot " + limb_name, chain,
                     VectorXd::LinSpaced(limb.second, 0.1, 0.5), limb.second);
     }
 
